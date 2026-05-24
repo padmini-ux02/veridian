@@ -50,7 +50,7 @@ docker-compose up --build
 
 | Service | URL |
 |---|---|
-| **Live Demo (Web/Mobile)** | https://016f24e7019ce7.lhr.life |
+| **Live Demo (Web/Mobile)** | https://YOUR_VERCEL_APP_URL.vercel.app |
 | Frontend (Local) | http://localhost:5173 |
 | Backend API | http://localhost:8000 |
 | API Docs | http://localhost:8000/docs |
