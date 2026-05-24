@@ -37,6 +37,16 @@ Veridian is fully optimized for both **mobile phones** and **laptops / desktops*
 
 ---
 
+## ☁️ Cloud Hosting & Infrastructure
+
+The production environment is deployed 24/7 in the cloud using the following platforms:
+
+- **[GitHub](https://github.com/)** — Holds the master source code repository and triggers automatic build pipelines upon commits.
+- **[Vercel](https://vercel.com/)** — Hosts the React typescript frontend UI, serving the fast responsive interface and loading the client-side Tesseract.js OCR camera scanner.
+- **[Render](https://render.com/)** — Hosts the FastAPI Python web service backend and SQLite/PostgreSQL database, running the machine learning ensemble models.
+
+---
+
 ## 🚀 Quick Start
 
 ### Option A — Docker (Recommended)
