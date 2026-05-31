@@ -1,0 +1,51 @@
+services:
+  # FastAPI Backend Web Service
+  - type: web
+    name: veridian-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: |
+      pip install --upgrade pip
+      pip install -r requirements.txt
+      python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords'); nltk.download('wordnet'); nltk.download('punkt_tab')"
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    plan: free
+    envVars:
+      - key: APP_NAME
+        value: Veridian
+      - key: APP_VERSION
+        value: 1.0.0
+      - key: DEBUG
+        value: false
+      - key: ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: 60
+      - key: RATE_LIMIT_PER_MINUTE
+        value: 60
+      - key: LOG_LEVEL
+        value: INFO
+      - key: LOG_FILE
+        value: ./logs/app.log
+      - key: MODEL_DIR
+        value: ./models
+      - key: SMS_MODEL_PATH
+        value: ./models/sms_model.pkl
+      - key: EMAIL_MODEL_PATH
+        value: ./models/email_model.pkl
+      - key: URL_MODEL_PATH
+        value: ./models/url_model.pkl
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: veridian-db
+          property: connectionString
+      - key: ALLOWED_ORIGINS
+        value: https://veridian-virid.vercel.app,http://localhost:5173,http://localhost:3000
+
+  # PostgreSQL Database
+databases:
+  - name: veridian-db
+    databaseName: veridian_db
+    plan: free

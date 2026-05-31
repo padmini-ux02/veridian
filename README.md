@@ -30,10 +30,10 @@ Veridian is fully optimized for both **mobile phones** and **laptops / desktops*
 
 **Frontend:** React 18 + TypeScript, Recharts, Lucide Icons, React Router  
 **Backend:** Python 3.11, FastAPI, SQLAlchemy, Pydantic v2  
-**Database:** PostgreSQL + Alembic migrations  
+**Database:** PostgreSQL (production) / SQLite (local dev)  
 **AI/ML:** Scikit-Learn (TF-IDF, RF, LR), NLTK, Regex ensemble  
 **Auth:** JWT (python-jose), bcrypt passlib  
-**DevOps:** Docker + Docker Compose, Uvicorn
+**DevOps:** Docker + Docker Compose, Uvicorn, Render, Vercel
 
 ---
 
@@ -41,31 +41,36 @@ Veridian is fully optimized for both **mobile phones** and **laptops / desktops*
 
 The production environment is deployed 24/7 in the cloud using the following platforms:
 
-- **[GitHub](https://github.com/)** — Holds the master source code repository and triggers automatic build pipelines upon commits.
-- **[Vercel](https://vercel.com/)** — Hosts the React typescript frontend UI, serving the fast responsive interface and loading the client-side Tesseract.js OCR camera scanner.
-- **[Render](https://render.com/)** — Hosts the FastAPI Python web service backend and SQLite/PostgreSQL database, running the machine learning ensemble models.
+- **[GitHub](https://github.com/padmini-ux02/veridian)** — Holds the master source code repository and triggers automatic build pipelines upon commits.
+- **[Vercel](https://vercel.com/)** — Hosts the React TypeScript frontend UI, serving the fast responsive interface and loading the client-side Tesseract.js OCR camera scanner.
+- **[Render](https://render.com/)** — Hosts the FastAPI Python web service backend and PostgreSQL database, running the machine learning ensemble models.
+
+| Service | URL |
+|---|---|
+| **Live Demo (Web/Mobile)** | https://veridian-virid.vercel.app/ |
+| Backend API | https://veridian-backend.onrender.com |
+| API Docs (Swagger) | https://veridian-backend.onrender.com/docs |
 
 ---
 
 ## 🚀 Quick Start
 
-### Option A — Docker (Recommended)
+### Option A — Docker (Local, Recommended)
 
 ```bash
-git clone <repo>
-cd "fraud detection system"
+git clone https://github.com/padmini-ux02/veridian.git
+cd veridian
 cp .env.example .env   # Edit values as needed
 docker-compose up --build
 ```
 
 | Service | URL |
 |---|---|
-| **Live Demo (Web/Mobile)** | https://veridian-virid.vercel.app/ |
 | Frontend (Local) | http://localhost:5173 |
 | Backend API | http://localhost:8000 |
 | API Docs | http://localhost:8000/docs |
 
-### Option B — Local Development
+### Option B — Local Development (Manual)
 
 **1. Backend Setup**
 
@@ -75,7 +80,7 @@ python -m venv venv
 .\venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 
-# Start server (SQLite is configured automatically)
+# Start server (SQLite configured automatically for local dev)
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
@@ -87,7 +92,7 @@ npm install
 npm run dev
 ```
 
-> **Note:** The `npm run dev` command now automatically exposes the app to your local network. Check the terminal for your Network IP (e.g. `http://192.168.1.X:5173`) to view the app on your mobile phone or tablet!
+> **Note:** `npm run dev` exposes the app to your local network. Check the terminal for your Network IP (e.g. `http://192.168.1.X:5173`) to view the app on mobile!
 
 ### Default Admin Credentials
 
@@ -97,6 +102,66 @@ Password: Admin@123456
 ```
 
 > ⚠️ Change the admin password immediately in production!
+
+---
+
+## ☁️ Cloud Deployment Guide
+
+### Step 1 — Backend on Render
+
+1. Go to [render.com](https://render.com) → **New** → **Web Service**
+2. Connect GitHub → select `padmini-ux02/veridian`
+3. Configure the service:
+   - **Root Directory:** `backend`
+   - **Runtime:** `Python 3`
+   - **Build Command:**
+     ```
+     pip install -r requirements.txt && python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords'); nltk.download('wordnet'); nltk.download('punkt_tab')"
+     ```
+   - **Start Command:** `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+4. Add a **PostgreSQL** database (New → PostgreSQL → name: `veridian-db`)
+5. Set environment variables in Render dashboard:
+
+| Variable | Value |
+|---|---|
+| `DATABASE_URL` | *(auto-filled from linked Render DB)* |
+| `SECRET_KEY` | *(generate a strong 32+ char random string)* |
+| `ALLOWED_ORIGINS` | `https://veridian-virid.vercel.app` |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | `60` |
+| `DEBUG` | `false` |
+
+6. Click **Deploy** — wait ~3–5 minutes for first build (ML deps are large)
+
+> **Note:** Render free tier **spins down after 15 minutes of inactivity** — the first request after idle takes ~30 seconds to wake up.
+
+---
+
+### Step 2 — Frontend on Vercel
+
+1. Go to [vercel.com](https://vercel.com) → **New Project** → Import `padmini-ux02/veridian`
+2. Configure the project:
+   - **Root Directory:** `frontend`
+   - **Framework Preset:** Vite
+   - **Build Command:** `npm run build`
+   - **Output Directory:** `dist`
+3. Add environment variable:
+
+| Variable | Value |
+|---|---|
+| `VITE_API_URL` | `https://veridian-backend.onrender.com/api/v1` |
+
+4. Click **Deploy** ✅
+
+---
+
+### Step 3 — Connect & Verify
+
+After both are deployed:
+1. Visit your Vercel URL: `https://veridian-virid.vercel.app`
+2. Register a new account → should work (hitting Render backend)
+3. Run an SMS scan → should return AI risk analysis
+4. Login as admin → check admin panel
+5. Verify backend health: `https://veridian-backend.onrender.com/health`
 
 ---
 
@@ -122,17 +187,19 @@ fraud detection system/
 │   │   ├── database.py      # DB Engine & Sessions
 │   │   └── main.py          # FastAPI Application
 │   ├── alembic/             # Database Migrations
+│   ├── render.yaml          # Render Blueprint (cloud deploy)
 │   ├── requirements.txt
 │   └── Dockerfile
 │
 ├── frontend/
-│   └── src/
-│       ├── pages/           # Route Page Components
-│       ├── components/      # Reusable UI Components
-│       ├── context/         # Auth & Theme Context
-│       ├── services/        # Axios API Client
-│       ├── types/           # TypeScript Interfaces
-│       └── index.css        # Design System
+│   ├── src/
+│   │   ├── pages/           # Route Page Components
+│   │   ├── components/      # Reusable UI Components
+│   │   ├── context/         # Auth & Theme Context
+│   │   ├── services/        # Axios API Client
+│   │   ├── types/           # TypeScript Interfaces
+│   │   └── index.css        # Design System
+│   └── vercel.json          # Vercel deployment config
 │
 ├── .env.example
 ├── docker-compose.yml
@@ -200,11 +267,12 @@ Each detector uses an **ensemble approach**:
 
 - **JWT Authentication** with configurable expiry
 - **bcrypt password hashing** (12 rounds)
-- **Rate limiting** — 100 req/min per IP (SlowAPI)
+- **Rate limiting** — 60 req/min per IP (SlowAPI)
 - **Input sanitization** — HTML stripping, length limits
 - **RBAC** — Admin and User roles
 - **Structured logging** — correlation IDs per request
 - **CORS** — configurable allowed origins
+- **Security headers** — X-Frame-Options, XSS Protection, CSP (via Vercel)
 
 ---
 
@@ -225,8 +293,8 @@ See `.env.example` for all available configuration options. Key variables:
 ```env
 SECRET_KEY=your-secret-key-here
 DATABASE_URL=postgresql://user:pass@localhost:5432/veridian_db
-ALLOWED_ORIGINS=http://localhost:5173
-ACCESS_TOKEN_EXPIRE_MINUTES=1440
+ALLOWED_ORIGINS=https://veridian-virid.vercel.app,http://localhost:5173
+ACCESS_TOKEN_EXPIRE_MINUTES=60
 ```
 
 ---
