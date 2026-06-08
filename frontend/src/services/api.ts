@@ -2,7 +2,7 @@ import axios from 'axios';
 
 let API_BASE = import.meta.env.VITE_API_URL;
 
-if (!API_BASE) {
+if (!API_BASE || API_BASE.includes('veridian-backend.onrender.com')) {
   if (typeof window !== 'undefined' && window.location.hostname.endsWith('.vercel.app')) {
     API_BASE = 'https://veridian-backend-lvke.onrender.com/api/v1';
   } else {

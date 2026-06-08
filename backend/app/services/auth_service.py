@@ -31,22 +31,25 @@ class AuthService:
             ValueError: If email or username already exists
         """
         # Check for existing email
-        existing_email = db.query(User).filter(User.email == user_data.email).first()
+        email_normalized = user_data.email.strip().lower()
+        username_normalized = user_data.username.strip().lower()
+
+        existing_email = db.query(User).filter(User.email == email_normalized).first()
         if existing_email:
             raise ValueError("An account with this email already exists")
 
         # Check for existing username
         existing_username = db.query(User).filter(
-            User.username == user_data.username
+            User.username == username_normalized
         ).first()
         if existing_username:
             raise ValueError("This username is already taken")
 
         # Create user
         new_user = User(
-            email=user_data.email,
-            username=user_data.username,
-            full_name=user_data.full_name,
+            email=email_normalized,
+            username=username_normalized,
+            full_name=user_data.full_name.strip(),
             hashed_password=hash_password(user_data.password),
             phone=user_data.phone,
             role="user",
@@ -72,24 +75,25 @@ class AuthService:
         Returns:
             User object if authentication succeeds, None otherwise
         """
-        user = db.query(User).filter(User.email == email).first()
+        email_normalized = email.strip().lower()
+        user = db.query(User).filter(User.email == email_normalized).first()
         if not user:
-            logger.warning(f"Login attempt for non-existent email: {email}")
+            logger.warning(f"Login attempt for non-existent email: {email_normalized}")
             return None
 
         if not user.is_active:
-            logger.warning(f"Login attempt for deactivated account: {email}")
+            logger.warning(f"Login attempt for deactivated account: {email_normalized}")
             return None
 
         if not verify_password(password, user.hashed_password):
-            logger.warning(f"Failed login attempt for: {email}")
+            logger.warning(f"Failed login attempt for: {email_normalized}")
             return None
 
         # Update last login
         user.last_login = datetime.utcnow()
         db.commit()
 
-        logger.info(f"Successful login: {email}")
+        logger.info(f"Successful login: {email_normalized}")
         return user
 
     @staticmethod
