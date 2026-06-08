@@ -1,6 +1,15 @@
 import axios from 'axios';
 
-const API_BASE = import.meta.env.VITE_API_URL || '/api/v1';
+let API_BASE = import.meta.env.VITE_API_URL;
+
+if (!API_BASE) {
+  if (typeof window !== 'undefined' && window.location.hostname.endsWith('.vercel.app')) {
+    API_BASE = 'https://veridian-backend-lvke.onrender.com/api/v1';
+  } else {
+    API_BASE = '/api/v1';
+  }
+}
+
 const api = axios.create({ baseURL: API_BASE });
 
 api.interceptors.request.use((config) => {

@@ -53,3 +53,5 @@ backend/models/
 !backend/render.yaml
 !frontend/vercel.json
 
+
+.vercel

@@ -48,8 +48,8 @@ The production environment is deployed 24/7 in the cloud using the following pla
 | Service | URL |
 |---|---|
 | **Live Demo (Web/Mobile)** | https://veridian-virid.vercel.app/ |
-| Backend API | https://veridian-backend.onrender.com |
-| API Docs (Swagger) | https://veridian-backend.onrender.com/docs |
+| Backend API | https://veridian-backend-lvke.onrender.com |
+| API Docs (Swagger) | https://veridian-backend-lvke.onrender.com/docs |
 
 ---
 
@@ -148,7 +148,7 @@ Password: Admin@123456
 
 | Variable | Value |
 |---|---|
-| `VITE_API_URL` | `https://veridian-backend.onrender.com/api/v1` |
+| `VITE_API_URL` | `https://veridian-backend-lvke.onrender.com/api/v1` |
 
 4. Click **Deploy** ✅
 
@@ -161,7 +161,7 @@ After both are deployed:
 2. Register a new account → should work (hitting Render backend)
 3. Run an SMS scan → should return AI risk analysis
 4. Login as admin → check admin panel
-5. Verify backend health: `https://veridian-backend.onrender.com/health`
+5. Verify backend health: `https://veridian-backend-lvke.onrender.com/health`
 
 ---
 
